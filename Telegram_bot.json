@@ -1,0 +1,169 @@
+{
+  "name": "Telegram-bot",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "83ffc306-b34f-401d-82fc-b87ae387256a",
+      "name": "Telegram Trigger",
+      "webhookId": "6c12125b-4818-451f-864a-556b16daee2a",
+      "credentials": {
+        "telegramApi": {
+          "id": "nsjPDAxBfyM69Bq9",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash-thinking-exp-1219",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        220,
+        200
+      ],
+      "id": "71cace54-f8d4-451a-95ce-d2e3573721bb",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "JHbCIpuvGS0OTqa9",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        560,
+        0
+      ],
+      "id": "b08fce09-7fa9-44bf-bc25-83ec45a22857",
+      "name": "Telegram",
+      "webhookId": "45090921-8dad-4564-a8b9-28be0b561e48",
+      "credentials": {
+        "telegramApi": {
+          "id": "nsjPDAxBfyM69Bq9",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Hi, I'm {{ $json.message.from.first_name }}. I have a question for you: {{ $json.message.text }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        220,
+        0
+      ],
+      "id": "baab62fb-8fb4-4f17-a5f8-8cf146db1e70",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Get the distance from the garage to determine if the garage is open or closed.\nIf the distance is less than 100, the garage is open. Otherwise, it is closed.",
+        "url": "http://10.0.0.152:8123/api/states/sensor.garage_door_1_distance",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        440,
+        200
+      ],
+      "id": "c35e514d-a2bd-48f9-b925-6a6e41f7ff9a",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "EA3pcEXKUJ6pNY5Z",
+          "name": "Bearer Auth account"
+        },
+        "httpHeaderAuth": {
+          "id": "cshfNXAMhWAuOrMA",
+          "name": "Header Auth account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "c7e7f1a7-e527-4424-8867-131db43a9128",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8cb7a615c7635810b618d7c74f83b191d5229fa84aac69a6ba6d773b9bf0a75e"
+  },
+  "id": "8xcbbW8fSbNP5jv6",
+  "tags": []
+}
